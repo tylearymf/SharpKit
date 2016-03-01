@@ -136,6 +136,8 @@ namespace SharpKit.Compiler.CsToJs
                 case ExpressionType.DivideAssign: return ExpressionType.Divide;
                 case ExpressionType.ModuloAssign: return ExpressionType.Modulo;
                 case ExpressionType.MultiplyAssign: return ExpressionType.Multiply;
+                case ExpressionType.OrAssign: return ExpressionType.Or;
+                case ExpressionType.AndAssign: return ExpressionType.And;
             }
             return null;
         }

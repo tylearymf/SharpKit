@@ -227,7 +227,7 @@ namespace SharpKit.JavaScript.Ast
         }
         void _Visit(JsFunction node)
         {
-            Keyword("function");
+            Keyword(node.IsCoroutine ? "function*" : "function");
             if (node.Name.IsNotNullOrEmpty())
             {
                 Write(" ", JsTokenType.Whitespace);

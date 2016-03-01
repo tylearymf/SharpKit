@@ -269,6 +269,11 @@ namespace SharpKit.Compiler
                 Time(ParseCs);
                 Time(ApplyExternalMetadata);
                 Time(ConvertCsToJs);
+
+
+                qiucw.OutputToFile();
+
+
                 Time(MergeJsFiles);
                 //Time(ValidateUnits));
                 Time(InjectJsCode);

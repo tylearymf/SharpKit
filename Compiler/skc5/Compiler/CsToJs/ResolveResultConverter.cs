@@ -420,7 +420,12 @@ namespace SharpKit.Compiler.CsToJs
             {
                 var pe = (IProperty)me;
                 var xxx = new CSharpInvocationResolveResult(res.TargetResult, pe.Getter, null);
-                node2 = Visit(xxx);
+                var fn = res.GetFirstNode();
+                qiucw.InvokeRR2Location.Add(xxx, new qiucw.InvocationLocation { FileName = fn.GetFileName(), Line = fn.StartLocation.Line });
+                {
+                    node2 = Visit(xxx);
+                }
+                qiucw.InvokeRR2Location.Remove(xxx);
                 return node2;
             }
             else if (me.IsEnumMember() && Sk.UseJsonEnums(me, out enumValuesAsNames))
@@ -439,6 +444,7 @@ namespace SharpKit.Compiler.CsToJs
             else
             {
                 var node3 = SkJs.EntityToMember(me);
+                qiucw.CheckAddInvocation(res, node3.Name);
                 node2 = node3;
                 if (res.TargetResult != null && !me.IsStatic())
                 {
@@ -501,12 +507,13 @@ namespace SharpKit.Compiler.CsToJs
         {
             get
             {
-                if (_ForceIntegers == null)
-                {
-                    var att = Compiler.GetJsExportAttribute();
-                    _ForceIntegers = att != null && att.ForceIntegers;
-                }
-                return _ForceIntegers.Value;
+                return true;
+                //if (_ForceIntegers == null)
+                //{
+                //    var att = Compiler.GetJsExportAttribute();
+                //    _ForceIntegers = att != null && att.ForceIntegers;
+                //}
+                //return _ForceIntegers.Value;
             }
         }
         internal JsNode ForceInteger(JsNode node2)
@@ -516,7 +523,8 @@ namespace SharpKit.Compiler.CsToJs
                 return node2; //problem
             if (!exp.Is(JsNodeType.MemberExpression))
                 exp = Js.Parentheses(exp);
-            return Js.BitwiseOr(exp, Js.Value(0));
+            //return Js.BitwiseOr(exp, Js.Value(0));
+            return Js.Parentheses(Js.BitwiseOr(exp, Js.Value(0)));
         }
         static string[] IntegerTypeNames = new string[]
         {
@@ -647,16 +655,17 @@ namespace SharpKit.Compiler.CsToJs
 
         internal JsInvocationExpression WrapFunctionAndInvoke(ResolveResult instanceContext, JsFunction func, params JsExpression[] args)
         {
-            JsExpression instanceContext2 = null;
-            var me = instanceContext.GetCurrentMethod();
-            if (me == null)
-            {
-                //TODO: WARN
-                instanceContext2 = Js.This();
-            }
-            else if (IsNonStatic(me))
-                instanceContext2 = Js.This();
+            // JsExpression instanceContext2 = null;
+            // var me = instanceContext.GetCurrentMethod();
+            // if (me == null)
+            // {
+            //     //TODO: WARN
+            //     instanceContext2 = Js.This();
+            // }
+            // else if (IsNonStatic(me))
+            //     instanceContext2 = Js.This();
 
+            JsExpression instanceContext2 = Js.This();
             return func.Parentheses().InvokeWithContextIfNeeded(instanceContext2, args);
         }
 

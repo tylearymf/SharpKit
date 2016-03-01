@@ -315,6 +315,7 @@ namespace SharpKit.Compiler.CsToJs
             func.Parameters = ExportMethodParameters(me);
             func.Name = SkJs.GetEntityJsName(me);
             func.Block = ExportMethodBody(me);
+            func.IsCoroutine = func.Block.ContainsYield;
             func = ApplyYield(func);
             return func;
         }
@@ -371,14 +372,16 @@ namespace SharpKit.Compiler.CsToJs
                 return null;
             }
             var block2 = (JsBlock)AstNodeConverter.Visit(def);
+            block2.ContainsYield = false;
             if (def.Descendants.OfType<YieldReturnStatement>().FirstOrDefault() != null)
             {
+                block2.ContainsYield = true;
                 if (!AstNodeConverter.SupportClrYield)
                 {
                     if (block2.Statements == null)
                         block2.Statements = new List<JsStatement>();
-                    block2.Statements.Insert(0, Js.Var("$yield", Js.NewJsonArray()).Statement());
-                    block2.Statements.Add(AstNodeConverter.GenerateYieldReturnStatement(me));
+                    //block2.Statements.Insert(0, Js.Var("$yield", Js.NewJsonArray()).Statement());
+                    //block2.Statements.Add(AstNodeConverter.GenerateYieldReturnStatement(me));
                 }
             }
             return block2;

@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Compiler\ClrResolveVisitor.cs" />
     <Compile Include="Compiler\CsToJs\TsMemberConverter.cs" />
+    <Compile Include="Compiler\qiucw.cs" />
     <Compile Include="JavaScript\Ast\JsModel.Visitor.generated.cs" />
     <Compile Include="JavaScript\JsCodeInliner.cs" />
     <Compile Include="Compiler\Extensions_Collections.cs" />

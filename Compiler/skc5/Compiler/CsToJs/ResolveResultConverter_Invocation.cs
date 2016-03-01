@@ -52,6 +52,9 @@ namespace SharpKit.Compiler.CsToJs
                 return omittedCallsNode;
 
             JsMember = SkJs.EntityToMember(Member);
+
+            qiucw.CheckAddInvocation(res, JsMember.Name);
+
             ProcessTarget();
 
             ProcessPrmBindings();
@@ -508,7 +511,7 @@ namespace SharpKit.Compiler.CsToJs
                     var func = Js.Function();
 
                     var inits2 = res.InitializerStatements.Select(t => Visit(t)).ToList();
-                    var init1 = res.InitializerStatements[0];
+                    //var init1 = res.InitializerStatements[0];
 
                     var target = AstNodeConverter.FindInitializedObjectResolveResult(res);// ((init1 as OperatorResolveResult).Operands[0] as MemberResolveResult).TargetResult as InitializedObjectResolveResult;
                     var varName = Importer.Initializers[target];

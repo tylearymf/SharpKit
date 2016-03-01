@@ -598,10 +598,11 @@ namespace SharpKit.Compiler
 
         public static bool IsNativeParams(IMethod me)
         {
-            var x = me.MD_JsMethodOrJsType(t => t._NativeParams, t => t._NativeParams);
-            if (x == null)
-                return true;
-            return x.Value;
+            //var x = me.MD_JsMethodOrJsType(t => t._NativeParams, t => t._NativeParams);
+            //if (x == null)
+            //    return true;
+            //return x.Value;
+            return false;
         }
 
         public static string GetPrototypeName(ITypeDefinition ce)

@@ -684,24 +684,29 @@ namespace SharpKit.Compiler.CsToJs
 
 		public static JsReturnStatement GenerateYieldReturnStatement(IMethod me)
 		{
-			JsReturnStatement node2;
-			if (me != null && me.ReturnType != null && me.ReturnType.FullName.StartsWith("System.Collections.Generic.IEnumerator"))
-				node2 = Js.Return(Js.Member("$yield").Member("GetEnumerator").Invoke());
-			else
-				node2 = Js.Return(Js.Member("$yield"));
-			return node2;
+            //JsReturnStatement node2;
+            //if (me != null && me.ReturnType != null && me.ReturnType.FullName.StartsWith("System.Collections.Generic.IEnumerator"))
+            //    node2 = Js.Return(Js.Member("$yield").Member("GetEnumerator").Invoke());
+            //else
+            //    node2 = Js.Return(Js.Member("$yield"));
+            //return node2;
+            return Js.Return();
 		}
 
 
 		public JsNode VisitYieldReturnStatement(YieldReturnStatement node)
 		{
+            qiucw.AddYieldReturn(node);
+
 			var exp2 = VisitExpression(node.Expression);
 			if (SupportClrYield)
 			{
 				return new JsYieldReturnStatement { Expression = exp2 };
 			}
-			var node2 = Js.Member("$yield.push").Invoke(exp2).Statement();
-			return node2;
+			//var node2 = Js.Member("$yield.push").Invoke(exp2).Statement();
+			//return node2;
+
+            return Js.Member("yield").Invoke(exp2).Statement();
 		}
 
 

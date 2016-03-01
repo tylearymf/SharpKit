@@ -292,6 +292,7 @@ namespace SharpKit.JavaScript.Ast
     }
     public partial class JsBlock : JsStatement
     {
+        public bool ContainsYield { get; set; }
         public List<JsStatement> Statements { get; set; }
     }
 
@@ -410,6 +411,7 @@ namespace SharpKit.JavaScript.Ast
     }
     public partial class JsFunction : JsExpression
     {
+        public bool IsCoroutine { get; set; }
         public string Name { get; set; }
         public List<string> Parameters { get; set; }
         public JsBlock Block { get; set; }
