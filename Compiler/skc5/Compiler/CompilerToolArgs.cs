@@ -41,6 +41,15 @@ namespace SharpKit.Compiler
         [ToolArgSwitch("dir")]
         public string CurrentDirectory { get; set; }
 
+        [ToolArgSwitch("AllInvocationsOutput")]
+        public string InvocationOutputFile { get; set; }
+
+        [ToolArgSwitch("AllInvocationsWithLocationOutput")]
+        public string InvocationOutputWithLocationFile { get; set; }
+
+        [ToolArgSwitch("YieldReturnTypeOutput")]
+        public string YieldReturnTypeFile { get; set; }
+
         [ToolArgSwitch("target")]
         public string Target { get; set; }
 

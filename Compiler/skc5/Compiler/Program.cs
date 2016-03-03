@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Configuration;
 using System.Threading;
 using System.Globalization;
+using Corex.IO.Tools;
 
 namespace SharpKit.Compiler
 {
@@ -23,68 +24,28 @@ namespace SharpKit.Compiler
                 return 0;
             }
 
-            string longArgs = File.ReadAllText(args[0]);
-            //string longArgs = File.ReadAllText("D:/Code/NOVA/trunk/Program/JSBinding/Assets/Temp/skc_args.txt");
-            string[] arr = longArgs.Split(' ');
-
-            List<string> lst = new List<string>();
-            int S = 0;
-            for (int i = 0; i < arr.Length; i++)
+            string[] resolvedArgs = null;
+            string paramFileTag = "/paramFile:";
+            if (args.Length == 1 && args[0].StartsWith(paramFileTag))
             {
-                string s = arr[i];
-                if (string.IsNullOrEmpty(s))
-                    continue;
-
-                if (S == 0)
+                string paramFile = args[0].Replace(paramFileTag,"");
+                if (File.Exists(paramFile))
                 {
-                    int a = s.IndexOf('\"');
-                    int b = s.LastIndexOf('\"');
-                    if (a >= 0 && b <= a)
-                    {
-                        lst.Add(s.Replace("\"", ""));
-                        S = 1;
-                    }
-                    else
-                    {
-                        lst.Add(s.Replace("\"", ""));
-                    }
+                    string longArgs = File.ReadAllText(paramFile);
+                    var tokenizer = new ToolArgsTokenizer();
+                    resolvedArgs = tokenizer.Tokenize(longArgs);
                 }
-                else if (S == 1)
+                else
                 {
-                    if (s.IndexOf('\"') >= 0)
-                    {
-                        lst[lst.Count - 1] += " " + s.Replace("\"", "");
-                        S = 0;
-                    }
-                    else
-                    {
-                        lst[lst.Count - 1] += " " + s;
-                    }
+                    System.Console.WriteLine("Error:<{0}> is not found", paramFile);
+                    return 0;
                 }
             }
 
-            const string K1 = "/AllInvocationsOutput:";
-            const string K2 = "/AllInvocationsWithLocationOutput:";
-            const string K3 = "/YieldReturnTypeOutput:";
-            foreach (var l in lst)
+            if (resolvedArgs == null)
             {
-                if (l.StartsWith(K1))
-                    qiucw.InvocationOutputFile = l.Substring(K1.Length);
-                else if (l.StartsWith(K2))
-                    qiucw.InvocationOutputWithLocationFile = l.Substring(K2.Length);
-                else if (l.StartsWith(K3))
-                    qiucw.YieldReturnTypeFile = l.Substring(K3.Length);
+                resolvedArgs = args;
             }
-
-            //StringBuilder sb = new StringBuilder();
-            //foreach (var l in lst)
-            //    sb.AppendLine(l);
-            //File.WriteAllText("D:\\6.txt", sb.ToString());
-
-            //return 0;
-
-            string[] resolvedArgs = lst.ToArray();
-
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -101,7 +62,6 @@ namespace SharpKit.Compiler
             stopwatch.Stop();
             System.Console.WriteLine("Total: {0}ms", stopwatch.ElapsedMilliseconds);
             //System.Console.Flush();
-            //System.Console.Read();
             return res;
 
         }

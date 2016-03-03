@@ -270,8 +270,8 @@ namespace SharpKit.Compiler
                 Time(ApplyExternalMetadata);
                 Time(ConvertCsToJs);
 
-
-                qiucw.OutputToFile();
+                //输出所有js代码转换情况信息
+                qiucw.OutputToFile(Args.InvocationOutputFile,Args.InvocationOutputWithLocationFile,Args.YieldReturnTypeFile);
 
 
                 Time(MergeJsFiles);

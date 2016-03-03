@@ -110,16 +110,16 @@ namespace SharpKit.Compiler
         static Dictionary<string, List<InvocationLocation>> YieldType2Location = new Dictionary<string,List<InvocationLocation>>();
         public static void AddYieldReturn(ICSharpCode.NRefactory.CSharp.YieldReturnStatement node)
         {
-            var rr = node.Expression.Resolve() as ICSharpCode.NRefactory.Semantics.ConversionResolveResult;
+            var result = node.Expression.Resolve() as ICSharpCode.NRefactory.Semantics.ConversionResolveResult;
             try
             {
-                if (rr != null)
+                if (result != null)
                 {
                     string k;
-                    if (rr.Input.Type.Kind == TypeKind.Null)
+                    if (result.Input.Type.Kind == TypeKind.Null)
                         k = "null";
                     else
-                        k = SkJs.GetEntityJsName(rr.Input.Type);
+                        k = SkJs.GetEntityJsName(result.Input.Type);
 
                     InvocationLocation loc = new InvocationLocation { FileName = node.GetFileName(), Line = node.StartLocation.Line };
                     if (!YieldType2Location.ContainsKey(k))
@@ -130,67 +130,69 @@ namespace SharpKit.Compiler
             }
             catch (Exception e)
             {
-                e = e;
+                System.Console.WriteLine(e.Message);
             }
         }
 
-
-        public static string InvocationOutputFile { get; set; }
-        public static string InvocationOutputWithLocationFile { get; set; }
-        public static string YieldReturnTypeFile { get; set; }
-
-        public static void OutputToFile()
+        public static void OutputToFile(string InvocationOutputFile,string InvocationOutputWithLocationFile,string YieldReturnTypeFile)
         {
             StringBuilder sb = new StringBuilder();
-            foreach (var KV in qiucw.dictInvocation)
+            if (!string.IsNullOrEmpty(InvocationOutputFile))
             {
-                sb.AppendFormat("[{0}]\r\n", KV.Key);
-
-                Dictionary<string, List<qiucw.InvocationLocation>> D = KV.Value;
-                foreach (var KV2 in D)
+                foreach (var KV in qiucw.dictInvocation)
                 {
-                    sb.AppendFormat("    {0}\r\n", KV2.Key);
+                    sb.AppendFormat("[{0}]\r\n", KV.Key);
+
+                    Dictionary<string, List<qiucw.InvocationLocation>> D = KV.Value;
+                    foreach (var KV2 in D)
+                    {
+                        sb.AppendFormat("    {0}\r\n", KV2.Key);
+                    }
+                    sb.Append("\r\n");
                 }
-                sb.Append("\r\n");
+                File.WriteAllText(InvocationOutputFile, sb.ToString());
             }
-            File.WriteAllText(InvocationOutputFile, sb.ToString());
 
             //------------------------------------------------------------------------------
 
-            sb = new StringBuilder();
-            foreach (var KV in qiucw.dictInvocation)
+            if (!string.IsNullOrEmpty(InvocationOutputWithLocationFile))
             {
-                sb.AppendFormat("[{0}]\r\n", KV.Key);
-
-                Dictionary<string, List<qiucw.InvocationLocation>> D = KV.Value;
-                foreach (var KV2 in D)
+                sb.Length = 0;
+                foreach (var KV in qiucw.dictInvocation)
                 {
-                    sb.AppendFormat("    {0}\r\n", KV2.Key);
+                    sb.AppendFormat("[{0}]\r\n", KV.Key);
 
-                    List<qiucw.InvocationLocation> L = KV2.Value;
+                    Dictionary<string, List<qiucw.InvocationLocation>> D = KV.Value;
+                    foreach (var KV2 in D)
+                    {
+                        sb.AppendFormat("    {0}\r\n", KV2.Key);
+
+                        List<qiucw.InvocationLocation> L = KV2.Value;
+                        for (int i = 0; i < L.Count; i++)
+                        {
+                            sb.AppendFormat("        {0},{1},{2}\r\n", i + 1, L[i].FileName, L[i].Line);
+                        }
+                    }
+                    sb.Append("\r\n");
+                }
+                File.WriteAllText(InvocationOutputWithLocationFile, sb.ToString());
+            }
+            //----------------------------------------------------------------------------
+            if (!string.IsNullOrEmpty(YieldReturnTypeFile))
+            {
+                sb.Length = 0;
+                foreach (var KV in YieldType2Location)
+                {
+                    sb.AppendFormat("[{0}]\r\n", KV.Key);
+
+                    List<qiucw.InvocationLocation> L = KV.Value;
                     for (int i = 0; i < L.Count; i++)
                     {
-                        sb.AppendFormat("        {0},{1},{2}\r\n", i + 1, L[i].FileName, L[i].Line);
+                        sb.AppendFormat("    {0},{1},{2}\r\n", i + 1, L[i].FileName, L[i].Line);
                     }
                 }
-                sb.Append("\r\n");
+                File.WriteAllText(YieldReturnTypeFile, sb.ToString());
             }
-            File.WriteAllText(InvocationOutputWithLocationFile, sb.ToString());
-
-            //----------------------------------------------------------------------------
-
-            sb = new StringBuilder();
-            foreach (var KV in YieldType2Location)
-            {
-                sb.AppendFormat("[{0}]\r\n", KV.Key);
-
-                List<qiucw.InvocationLocation> L = KV.Value;
-                for (int i = 0; i < L.Count; i++)
-                {
-                    sb.AppendFormat("    {0},{1},{2}\r\n", i + 1, L[i].FileName, L[i].Line);
-                }
-            }
-            File.WriteAllText(YieldReturnTypeFile, sb.ToString());
         }
     }
 }

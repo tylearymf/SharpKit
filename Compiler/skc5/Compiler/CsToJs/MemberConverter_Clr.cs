@@ -379,7 +379,7 @@ namespace SharpKit.Compiler.CsToJs
                     var attCtor = t.Constructor;
                     if (attCtor == null)
                     {
-                        Log.Warn(t.GetParent(), "Cannot resolve attribute constructor");
+                        //Log.Warn(t.GetParent(), "Cannot resolve attribute constructor");
                         return false;
                     }
                     var attType = attCtor.GetDeclaringTypeDefinition();
