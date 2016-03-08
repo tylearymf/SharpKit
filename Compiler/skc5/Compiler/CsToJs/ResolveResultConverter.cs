@@ -338,7 +338,6 @@ namespace SharpKit.Compiler.CsToJs
 
         public JsNode VisitConstantResolveResult(ConstantResolveResult res)
         {
-            var nodes = res.GetNodes();
             if (res.Type is DefaultTypeParameter)
             {
                 return Js.Member("Default").Invoke(SkJs.EntityTypeRefToMember(res.Type));
@@ -353,19 +352,17 @@ namespace SharpKit.Compiler.CsToJs
                 //TODO:
                 //return Visit(JsTypeImporter.GetValueTypeInitializer(res.Type, Project));
             }
-            //var nodes = res.GetNodes();
-            //if (nodes.IsNotNullOrEmpty())
-            //{
-            //    var node = nodes[0];
-            //    if (node != null && node is PrimitiveExpression)
-            //    {
-            //        var node2 = Visit(node); //use literal value instead
-            //        return node2;
-            //    }
-            //}
+            var nodes = res.GetNodes();
             if (nodes.IsNotNullOrEmpty())
             {
-                return Js.Value(res.ConstantValue, string.Format(" /* {0} */", nodes[0].ToString()));
+                if (nodes[0] != null)
+                {
+                    bool isPrimitiveExpr = nodes[0] is PrimitiveExpression;
+                    if (!isPrimitiveExpr)
+                    {
+                        return Js.Value(res.ConstantValue, string.Format(" /* {0} */", nodes[0].ToString()));
+                    }
+                }
             }
             return Js.Value(res.ConstantValue);
         }
@@ -446,7 +443,14 @@ namespace SharpKit.Compiler.CsToJs
                 var nodes = res.GetNodes();
                 if (nodes.IsNotNullOrEmpty())
                 {
-                    return Js.Value(res.ConstantValue, string.Format(" /* {0} */", nodes[0].ToString()));
+                    if (nodes[0] != null)
+                    {
+                        bool isPrimitiveExpr = nodes[0] is PrimitiveExpression;
+                        if (!isPrimitiveExpr)
+                        {
+                            return Js.Value(res.ConstantValue, string.Format(" /* {0} */", nodes[0].ToString()));
+                        }
+                    }
                 }
                 return Js.Value(res.ConstantValue);
             }
