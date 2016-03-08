@@ -57,7 +57,7 @@ namespace SharpKit.JavaScript.Ast
         {
             return new JsJsonNameValue { Name = new JsJsonMember { Name = name }, Value = value };
         }
-        public static JsExpression Value(object value)
+        public static JsExpression Value(object value,string comment="")
         {
             var s = JavaScriptHelper.ToJavaScriptValue(value);
             //if (value is char)
@@ -65,7 +65,11 @@ namespace SharpKit.JavaScript.Ast
             //else if(value is string)
             //    return Code(JavaScriptHelper.ToJavaScriptString((string)value));
             //var s = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(value);
-            return CodeExpression(s);//JavaScriptHelper.ToJavaScriptValue(value));
+            //return CodeExpression(s);//JavaScriptHelper.ToJavaScriptValue(value));
+            var codeExpr = CodeExpression(s);
+            if (comment.IsNotNullOrEmpty())
+                codeExpr.Code += comment;
+            return codeExpr;
         }
 
         public static JsSwitchStatement Switch(JsExpression exp)

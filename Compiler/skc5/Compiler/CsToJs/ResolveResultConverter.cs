@@ -363,6 +363,10 @@ namespace SharpKit.Compiler.CsToJs
             //        return node2;
             //    }
             //}
+            if (nodes.IsNotNullOrEmpty())
+            {
+                return Js.Value(res.ConstantValue, string.Format(" /* {0} */", nodes[0].ToString()));
+            }
             return Js.Value(res.ConstantValue);
         }
 
@@ -439,6 +443,11 @@ namespace SharpKit.Compiler.CsToJs
             //TODO: Support a way to override this (JsField.ConstantInlining=false)
             else if (res.IsCompileTimeConstant && !me.IsEnumMember())
             {
+                var nodes = res.GetNodes();
+                if (nodes.IsNotNullOrEmpty())
+                {
+                    return Js.Value(res.ConstantValue, string.Format(" /* {0} */", nodes[0].ToString()));
+                }
                 return Js.Value(res.ConstantValue);
             }
             else
