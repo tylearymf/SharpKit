@@ -440,20 +440,22 @@ namespace SharpKit.Compiler.CsToJs
                 var func = Js.Function();
 
                 //It must assigned to a temporary variable, because typed arrays do not acceppt json.
+                //调整原来使用临时对象.Value的赋值方式，修改为Object.defineProperty定义get|set方法的实现
+                //临时对象统一调用jsclr里的$Ref方法进行创建
                 for (var i = 0; i < ByRefs.Count; i++)
                 {
                     var byRef = ByRefs[i];
-                    func.Add(Js.Var(RefIndexToName(i), Js.Json().Add("Value", VisitExpression(byRef))).Statement());
+                    var expr = (JsMemberExpression)VisitExpression(byRef);
+                    var refFuncInvoke = new JsInvocationExpression
+                    {
+                        Member = new JsMemberExpression { Name = "$Ref" },
+                        Arguments = new List<JsExpression> { expr.PreviousMember, Js.String(expr.Name) }
+                    };
+                    func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
                 }
 
                 func.Add(Js.Var("$res", Node2).Statement());
-
-                for (var i = 0; i < ByRefs.Count; i++)
-                {
-                    var byRef = ByRefs[i];
-                    func.Add(Js.Assign(VisitExpression(byRef), Js.Member(Js.Member(RefIndexToName(i)), "Value")).Statement());
-                }
-
+          
                 func.Add(Js.Return(Js.Member("$res")));
                 Node2 = Importer.WrapFunctionAndInvoke(Res, func);
             }
