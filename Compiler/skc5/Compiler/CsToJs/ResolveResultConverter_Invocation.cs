@@ -417,14 +417,22 @@ namespace SharpKit.Compiler.CsToJs
             var c = 0;
             for (var i = 0; i < Node2.Arguments.Count; i++)
             {
-                JsMemberExpression jsmex = Node2.Arguments[i] as JsMemberExpression;
-                if (jsmex != null)
+                if (Node2.Arguments[i] is JsMemberExpression)
                 {
+                    JsMemberExpression jsmex = Node2.Arguments[i] as JsMemberExpression;
                     if (RefToRefs.Contains(i))
                     {
                         Node2.Arguments[i] = jsmex.PreviousMember; //remove the .Value ref wrapper
                     }
                     else if (ByRefIndexes.Contains(i))
+                    {
+                        Node2.Arguments[i] = Js.Member(RefIndexToName(c));
+                        c++;
+                    }
+                }
+                else if (Node2.Arguments[i] is JsIndexerAccessExpression)
+                {
+                    if (ByRefIndexes.Contains(i))
                     {
                         Node2.Arguments[i] = Js.Member(RefIndexToName(c));
                         c++;
@@ -445,13 +453,29 @@ namespace SharpKit.Compiler.CsToJs
                 for (var i = 0; i < ByRefs.Count; i++)
                 {
                     var byRef = ByRefs[i];
-                    var expr = (JsMemberExpression)VisitExpression(byRef);
-                    var refFuncInvoke = new JsInvocationExpression
+                    var expr = VisitExpression(byRef);
+                    if (expr is JsMemberExpression)
                     {
-                        Member = new JsMemberExpression { Name = "$Ref" },
-                        Arguments = new List<JsExpression> { expr.PreviousMember, Js.String(expr.Name) }
-                    };
-                    func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
+                        var memberExpr = expr as JsMemberExpression;
+                        var refFuncInvoke = new JsInvocationExpression
+                        {
+                            Member = new JsMemberExpression { Name = "$Ref" },
+                            Arguments = new List<JsExpression> { memberExpr.PreviousMember, Js.String(memberExpr.Name) }
+                        };
+                        func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
+                    }
+                    else if(expr is JsIndexerAccessExpression)
+                    {
+                        var indexerExpr = expr as JsIndexerAccessExpression;
+                        var indexArg = indexerExpr.Arguments[0];
+                        var refFuncInvoke = new JsInvocationExpression
+                        {
+                            Member = new JsMemberExpression { Name = "$Ref" },
+                            Arguments = new List<JsExpression> { indexerExpr.Member, indexArg }
+                        };
+                        func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
+                    }
+
                 }
 
                 func.Add(Js.Var("$res", Node2).Statement());
