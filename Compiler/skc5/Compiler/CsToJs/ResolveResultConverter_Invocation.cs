@@ -457,12 +457,25 @@ namespace SharpKit.Compiler.CsToJs
                     if (expr is JsMemberExpression)
                     {
                         var memberExpr = expr as JsMemberExpression;
-                        var refFuncInvoke = new JsInvocationExpression
+                        if (memberExpr.PreviousMember != null)
                         {
-                            Member = new JsMemberExpression { Name = "$Ref" },
-                            Arguments = new List<JsExpression> { memberExpr.PreviousMember, Js.String(memberExpr.Name) }
-                        };
-                        func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
+                            var refFuncInvoke = new JsInvocationExpression
+                            {
+                                Member = new JsMemberExpression {Name = "$Ref"},
+                                Arguments = new List<JsExpression> {memberExpr.PreviousMember, Js.String(memberExpr.Name)}
+                            };
+                            func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
+                        }
+                        else
+                        {
+                            //如果是局部变量的话使用旧实现方式
+                            var refFuncInvoke = new JsInvocationExpression
+                            {
+                                Member = new JsMemberExpression { Name = "$Ref" },
+                                Arguments = new List<JsExpression> { Js.Member("null"), memberExpr }
+                            };
+                            func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
+                        }
                     }
                     else if(expr is JsIndexerAccessExpression)
                     {
@@ -475,10 +488,19 @@ namespace SharpKit.Compiler.CsToJs
                         };
                         func.Add(Js.Var(RefIndexToName(i), refFuncInvoke).Statement());
                     }
-
                 }
 
                 func.Add(Js.Var("$res", Node2).Statement());
+
+                for (var i = 0; i < ByRefs.Count; i++)
+                {
+                    var byRef = ByRefs[i];
+                    var memberExpr = VisitExpression(byRef) as JsMemberExpression;
+                    if (memberExpr != null && memberExpr.PreviousMember == null)
+                    {
+                        func.Add(memberExpr.Assign(Js.Member(RefIndexToName(i)).Member("Value")).Statement());
+                    }
+                }
           
                 func.Add(Js.Return(Js.Member("$res")));
                 Node2 = Importer.WrapFunctionAndInvoke(Res, func);
