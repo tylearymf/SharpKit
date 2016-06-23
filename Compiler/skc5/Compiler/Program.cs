@@ -62,6 +62,10 @@ namespace SharpKit.Compiler
             stopwatch.Stop();
             System.Console.WriteLine("Total: {0}ms", stopwatch.ElapsedMilliseconds);
             //System.Console.Flush();
+            if (res < 0 && skc.Args.exitReadKey.GetValueOrDefault())
+            {
+                System.Console.ReadKey();
+            }
             return res;
 
         }

@@ -71,6 +71,8 @@ namespace SharpKit.Compiler
         [ToolArgSwitch("nonefile")]
         public List<string> NoneFiles { get; private set; }
 
+        public bool? exitReadKey { get; set; }
+
         public bool why { get; set; }
 
         public bool? rebuild { get; set; }
