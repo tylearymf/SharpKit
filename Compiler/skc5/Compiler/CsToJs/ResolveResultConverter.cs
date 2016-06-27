@@ -12,6 +12,7 @@ using Mirrored.SharpKit.JavaScript;
 using SharpKit.JavaScript.Ast;
 using ICSharpCode.NRefactory.Extensions;
 using System.Linq.Expressions;
+using ICSharpCode.NRefactory.PatternMatching;
 
 namespace SharpKit.Compiler.CsToJs
 {
@@ -791,6 +792,20 @@ namespace SharpKit.Compiler.CsToJs
             var nodes = res.GetNodes();
             if (nodes == null)
                 return exp;
+            //如果Primitive类型表达式，判断其调用方法是为ToString时，再套多一层括号
+            var primitiveExp = nodes.OfType<PrimitiveExpression>().FirstOrDefault();
+            if (primitiveExp != null)
+            {
+                var nextToken = primitiveExp.NextSibling;
+                if (nextToken != null && nextToken.ToString() == ".")
+                {
+                    nextToken = nextToken.NextSibling;
+                    if (nextToken != null && nextToken.ToString() == "ToString")
+                    {
+                        return new JsParenthesizedExpression { Expression = exp };
+                    }
+                }
+            }
             var cspe = nodes.OfType<ParenthesizedExpression>().FirstOrDefault();
             if (cspe == null)
                 return exp;
