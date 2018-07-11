@@ -260,6 +260,23 @@ namespace SharpKit.Compiler.CsToJs
                 var node3 = Js.CodeExpression(value == null ? "null" : value.ToString());
                 return node3;
             }
+            
+            #region 修复c#方法重载导致转js后绑定错误
+            var tInfo = input.Tag as ResolveResultInfo;
+            if(tInfo != null && tInfo.Conversion != null && tInfo.Conversion.Method != null
+               && conversion != null && conversion.Method != null)
+            {
+                if(tInfo.Conversion.Method.ToString() != conversion.Method.ToString())
+                {
+                    var tNewTag = res.Tag as ResolveResultInfo;
+                    var tTag = input.Tag as ResolveResultInfo;
+                    tTag.Conversion = tNewTag.Conversion;
+                    tTag.ConversionTargetType = tNewTag.ConversionTargetType;
+                    tTag.ResolveResult = tNewTag.ResolveResult;
+                }
+            }
+            #endregion
+            
             return VisitConversion(input, conversion, conversionType);
         }
 
