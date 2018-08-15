@@ -712,6 +712,25 @@ namespace SharpKit.Compiler.CsToJs
 
 		public JsNode VisitVariableInitializer(VariableInitializer node)
 		{
+			var tLocal = node.Annotation<LocalResolveResult>();
+			if(tLocal != null && tLocal.Type != null && tLocal.Type.Kind == TypeKind.Struct
+			   && node.ToString() == node.NameToken.ToString() && node.NextSibling.ToString() == ";")
+			{
+				var tType = Type.GetType(tLocal.Type.FullName);
+				//对于基本数据类型，不用new
+				if(tType == null || !tType.IsPrimitive)
+				{
+					var tTypeMember = new JsMemberExpression { Name = tLocal.Type.FullName };
+					var tCtorMember = new JsMemberExpression { Name = "ctor", PreviousMember = tTypeMember };
+					var tInvocation = new JsInvocationExpression { Member = tCtorMember };
+					var tNewObject = new JsNewObjectExpression { Invocation = tInvocation };
+					return new JsVariableDeclarator
+					{
+						Name = node.Name,
+						Initializer = tNewObject,
+					};
+				}
+			}
 			return new JsVariableDeclarator { Name = node.Name, Initializer = VisitExpression(node.Initializer) };
 		}
 
