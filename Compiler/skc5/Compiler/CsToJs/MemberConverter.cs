@@ -554,9 +554,22 @@ namespace SharpKit.Compiler.CsToJs
             }
             else //clr
             {
+                ChangeNullableCtorName(fieldOrProperty, jsInit);
+                
                 var st = jsInit.Statement();
                 return st;
             }
+        }
+        
+        void ChangeNullableCtorName(IMember pField, JsNode pNode)
+        {
+            if(!(pField is IField) || !(pNode is JsBinaryExpression)) return;
+            var tField = pField as IField;
+            var tNode = pNode as JsBinaryExpression;
+            if(tField.Type == null || tField.Type.Kind != TypeKind.Struct || tField.Type.FullName != "System.Nullable") return;
+            var tNode2 = tNode.Right as JsNewObjectExpression;
+            if(tNode2 == null || tNode2.Invocation == null || !(tNode2.Invocation.Member is JsMemberExpression)) return;
+            (tNode2.Invocation.Member as JsMemberExpression).Name = "ctor$1";
         }
 
         public ResolveResult GetDefaultValueExpression(IType typeRef)
