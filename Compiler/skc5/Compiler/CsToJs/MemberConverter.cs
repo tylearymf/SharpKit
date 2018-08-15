@@ -613,7 +613,7 @@ namespace SharpKit.Compiler.CsToJs
         {
             var fullName = SkJs.GetEntityJsName(ce);
             if (ce.FullName == "System.Nullable")
-                return Cs.Null();
+                return Cs.New(ce);
             if (ce is ITypeDefinition)
             {
                 var def = (ITypeDefinition)ce;
