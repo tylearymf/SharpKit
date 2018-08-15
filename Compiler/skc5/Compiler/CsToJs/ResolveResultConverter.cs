@@ -351,6 +351,16 @@ namespace SharpKit.Compiler.CsToJs
                     return node2;
                 }
             }
+            else if(conversion.IsNullableConversion)
+            {
+                var node2 = Visit(input);
+                var node3 = Visit(Cs.New(conversionType));
+                if(node3 is JsNewObjectExpression && node2 is JsExpression)
+                {
+                    (node3 as JsNewObjectExpression).Invocation.AddArgument(node2 as JsExpression);
+                    return node3;
+                }
+            }
             return Visit(input);
         }
 
